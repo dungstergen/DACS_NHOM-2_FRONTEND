@@ -5,15 +5,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
+import { Link, useLocation, useNavigate, Outlet } from "react-router";
 
-type Props = {
-  current: string;
-  onNavigate: (k: string) => void;
-  onSwitchUser: () => void;
-  children: React.ReactNode;
-};
+export function AdminLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Extract the current path segment for the admin route (e.g. "dashboard", "rooms")
+  // If location.pathname is "/admin/rooms", pathKey is "rooms"
+  // If location.pathname is "/admin", pathKey is "dashboard" (default)
+  const pathKey = location.pathname.split("/").filter(Boolean)[1] || "dashboard";
 
-export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Props) {
   const groups = [
     {
       label: "Tổng quan",
@@ -40,7 +42,7 @@ export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Pro
   ];
 
   const flat = groups.flatMap((g) => g.items);
-  const currentLabel = flat.find((i) => i.k === current)?.label || "Dashboard";
+  const currentLabel = flat.find((i) => i.k === pathKey)?.label || "Dashboard";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -66,11 +68,11 @@ export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Pro
                 <div className="space-y-1">
                   {g.items.map((it) => {
                     const Icon = it.icon;
-                    const active = current === it.k;
+                    const active = pathKey === it.k;
                     return (
-                      <button
+                      <Link
                         key={it.k}
-                        onClick={() => onNavigate(it.k)}
+                        to={`/admin/${it.k}`}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                           active
                             ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
@@ -79,7 +81,7 @@ export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Pro
                       >
                         <Icon className="w-4 h-4" />
                         <span>{it.label}</span>
-                      </button>
+                      </Link>
                     );
                   })}
                 </div>
@@ -89,7 +91,7 @@ export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Pro
 
           <div className="p-3 border-t border-border space-y-1">
             <button
-              onClick={onSwitchUser}
+              onClick={() => navigate("/")}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <LogOut className="w-4 h-4" /> Về trang người dùng
@@ -120,7 +122,9 @@ export function AdminLayout({ current, onNavigate, onSwitchUser, children }: Pro
             </div>
           </header>
 
-          <main className="flex-1 p-8 overflow-x-hidden">{children}</main>
+          <main className="flex-1 p-8 overflow-x-hidden">
+            <Outlet />
+          </main>
         </div>
       </div>
     </div>

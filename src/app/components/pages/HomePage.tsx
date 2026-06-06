@@ -4,10 +4,11 @@ import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { RoomCard } from "../RoomCard";
 import { ROOMS, BLOG_POSTS } from "../../data/mock";
+import { useNavigate } from "react-router";
 
-type Props = { onOpenRoom: (id: string) => void; onNavigate: (p: string) => void };
+export function HomePage() {
+  const navigate = useNavigate();
 
-export function HomePage({ onOpenRoom, onNavigate }: Props) {
   return (
     <div className="space-y-20 pb-20">
       {/* HERO */}
@@ -68,7 +69,7 @@ export function HomePage({ onOpenRoom, onNavigate }: Props) {
                 </SelectContent>
               </Select>
               <Button
-                onClick={() => onNavigate("rooms")}
+                onClick={() => navigate("/rooms")}
                 size="lg"
                 className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 px-6 h-full"
               >
@@ -115,13 +116,13 @@ export function HomePage({ onOpenRoom, onNavigate }: Props) {
             <div className="text-sm text-indigo-600 mb-2">Đề xuất cho bạn</div>
             <h2 className="text-3xl tracking-tight">Phòng nổi bật tuần này</h2>
           </div>
-          <Button variant="ghost" onClick={() => onNavigate("rooms")} className="hidden md:inline-flex">
+          <Button variant="ghost" onClick={() => navigate("/rooms")} className="hidden md:inline-flex">
             Xem tất cả <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {ROOMS.slice(0, 6).map((r) => (
-            <RoomCard key={r.id} room={r} onClick={() => onOpenRoom(r.id)} />
+            <RoomCard key={r.id} room={r} onClick={() => navigate(`/rooms/${r.id}`)} />
           ))}
         </div>
       </section>
@@ -155,13 +156,13 @@ export function HomePage({ onOpenRoom, onNavigate }: Props) {
             <div className="text-sm text-indigo-600 mb-2">Cẩm nang</div>
             <h2 className="text-3xl tracking-tight">Bài viết mới nhất</h2>
           </div>
-          <Button variant="ghost" onClick={() => onNavigate("blog")} className="hidden md:inline-flex">
+          <Button variant="ghost" onClick={() => navigate("/blog")} className="hidden md:inline-flex">
             Xem tất cả <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {BLOG_POSTS.slice(0, 3).map((b) => (
-            <article key={b.id} className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-border hover:shadow-xl transition-all">
+            <article key={b.id} onClick={() => navigate(`/blog`)} className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-border hover:shadow-xl transition-all">
               <div className="aspect-[16/10] overflow-hidden">
                 <img src={b.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>

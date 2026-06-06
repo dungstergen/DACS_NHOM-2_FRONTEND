@@ -8,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Separator } from "../ui/separator";
 import { RoomCard } from "../RoomCard";
 import { ROOMS, AMENITIES, formatVND } from "../../data/mock";
+import { useNavigate } from "react-router";
 
-type Props = { onOpenRoom: (id: string) => void };
-
-export function RoomsPage({ onOpenRoom }: Props) {
+export function RoomsPage() {
   const [price, setPrice] = useState<number[]>([2000000, 8000000]);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const navigate = useNavigate();
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -104,11 +104,11 @@ export function RoomsPage({ onOpenRoom }: Props) {
           <div className={view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5" : "space-y-4"}>
             {ROOMS.map((r) =>
               view === "grid" ? (
-                <RoomCard key={r.id} room={r} onClick={() => onOpenRoom(r.id)} />
+                <RoomCard key={r.id} room={r} onClick={() => navigate(`/rooms/${r.id}`)} />
               ) : (
                 <div
                   key={r.id}
-                  onClick={() => onOpenRoom(r.id)}
+                  onClick={() => navigate(`/rooms/${r.id}`)}
                   className="cursor-pointer rounded-2xl overflow-hidden bg-white border border-border hover:shadow-lg transition-all flex flex-col sm:flex-row"
                 >
                   <img src={r.images[0]} className="w-full sm:w-72 h-48 object-cover" />

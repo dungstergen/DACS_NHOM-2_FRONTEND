@@ -15,18 +15,19 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { ROOMS, formatVND } from "../../data/mock";
 import { toast } from "sonner";
+import { useParams, useNavigate } from "react-router";
 
-type Props = { roomId: string; onBack: () => void };
-
-export function RoomDetailPage({ roomId, onBack }: Props) {
-  const room = ROOMS.find((r) => r.id === roomId) || ROOMS[0];
+export function RoomDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const room = ROOMS.find((r) => r.id === id) || ROOMS[0];
   const [active, setActive] = useState(0);
-  const [date, setDate] = useState<Date | undefined>(new Date(2026, 4, 10));
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="w-4 h-4" /> Quay lại danh sách
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="w-4 h-4" /> Quay lại
       </button>
 
       <div className="flex items-start justify-between gap-4 mb-6">

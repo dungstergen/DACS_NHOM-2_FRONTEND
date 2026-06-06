@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { Routes, Route } from "react-router";
 import { Toaster } from "./components/ui/sonner";
-import { Header } from "./components/Header";
-import { Footer } from "./components/Footer";
+import { PublicLayout } from "./layouts/PublicLayout";
 import { HomePage } from "./components/pages/HomePage";
 import { RoomsPage } from "./components/pages/RoomsPage";
 import { RoomDetailPage } from "./components/pages/RoomDetailPage";
@@ -16,58 +15,36 @@ import {
 } from "./components/admin/Other";
 
 export default function App() {
-  const [mode, setMode] = useState<"user" | "admin">("user");
-  const [page, setPage] = useState("home");
-  const [adminPage, setAdminPage] = useState("dashboard");
-  const [roomId, setRoomId] = useState<string | null>(null);
-
-  const handleNavigate = (p: string) => {
-    setRoomId(null);
-    setPage(p);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  const handleOpenRoom = (id: string) => {
-    setRoomId(id);
-    setPage("detail");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (mode === "admin") {
-    return (
-      <>
-        <AdminLayout
-          current={adminPage}
-          onNavigate={(k) => setAdminPage(k)}
-          onSwitchUser={() => setMode("user")}
-        >
-          {adminPage === "dashboard" && <Dashboard />}
-          {adminPage === "rooms" && <RoomsManage />}
-          {adminPage === "appointments" && <Appointments />}
-          {adminPage === "deposits" && <Deposits />}
-          {adminPage === "contracts" && <Contracts />}
-          {adminPage === "invoices" && <Invoices />}
-          {adminPage === "costs" && <SystemCosts />}
-          {adminPage === "blog" && <BlogManage />}
-          {adminPage === "reports" && <Reports />}
-        </AdminLayout>
-        <Toaster position="top-right" />
-      </>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      <Header current={page} onNavigate={handleNavigate} onSwitchAdmin={() => setMode("admin")} />
-      <main>
-        {page === "home" && <HomePage onOpenRoom={handleOpenRoom} onNavigate={handleNavigate} />}
-        {page === "rooms" && <RoomsPage onOpenRoom={handleOpenRoom} />}
-        {page === "detail" && roomId && <RoomDetailPage roomId={roomId} onBack={() => handleNavigate("rooms")} />}
-        {page === "myrooms" && <MyRoomsPage />}
-        {page === "blog" && <BlogPage />}
-        {page === "auth" && <AuthPage />}
-      </main>
-      {page !== "auth" && <Footer />}
+    <>
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/rooms" element={<RoomsPage />} />
+          <Route path="/rooms/:id" element={<RoomDetailPage />} />
+          <Route path="/myrooms" element={<MyRoomsPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+        </Route>
+
+        {/* Auth Route without Header/Footer */}
+        <Route path="/auth" element={<AuthPage />} />
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="rooms" element={<RoomsManage />} />
+          <Route path="appointments" element={<Appointments />} />
+          <Route path="deposits" element={<Deposits />} />
+          <Route path="contracts" element={<Contracts />} />
+          <Route path="invoices" element={<Invoices />} />
+          <Route path="costs" element={<SystemCosts />} />
+          <Route path="blog" element={<BlogManage />} />
+          <Route path="reports" element={<Reports />} />
+        </Route>
+      </Routes>
       <Toaster position="top-right" />
-    </div>
+    </>
   );
 }

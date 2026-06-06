@@ -10,27 +10,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Link, useLocation, useNavigate } from "react-router";
 
-type Props = {
-  current: string;
-  onNavigate: (page: string) => void;
-  onSwitchAdmin: () => void;
-};
+export function Header() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-export function Header({ current, onNavigate, onSwitchAdmin }: Props) {
   const items = [
-    { id: "home", label: "Trang chủ" },
-    { id: "rooms", label: "Tìm phòng" },
-    { id: "myrooms", label: "Phòng của tôi" },
-    { id: "blog", label: "Blog" },
+    { id: "/", label: "Trang chủ" },
+    { id: "/rooms", label: "Tìm phòng" },
+    { id: "/myrooms", label: "Phòng của tôi" },
+    { id: "/blog", label: "Blog" },
   ];
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-border">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-10">
-          <button
-            onClick={() => onNavigate("home")}
+          <Link
+            to="/"
             className="flex items-center gap-2"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
@@ -39,21 +37,21 @@ export function Header({ current, onNavigate, onSwitchAdmin }: Props) {
             <span className="text-lg tracking-tight">
               Tro<span className="text-indigo-600">Hub</span>
             </span>
-          </button>
+          </Link>
 
           <nav className="hidden md:flex items-center gap-1">
             {items.map((it) => (
-              <button
+              <Link
                 key={it.id}
-                onClick={() => onNavigate(it.id)}
+                to={it.id}
                 className={`px-4 py-2 rounded-full transition-colors ${
-                  current === it.id
+                  (it.id === "/" ? location.pathname === "/" : location.pathname.startsWith(it.id))
                     ? "bg-indigo-50 text-indigo-700"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {it.label}
-              </button>
+              </Link>
             ))}
           </nav>
         </div>
@@ -80,12 +78,12 @@ export function Header({ current, onNavigate, onSwitchAdmin }: Props) {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onNavigate("auth")}>Đăng nhập / Đăng ký</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onNavigate("myrooms")}>Phòng của tôi</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/auth")}>Đăng nhập / Đăng ký</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/myrooms")}>Phòng của tôi</DropdownMenuItem>
               <DropdownMenuItem>Yêu thích</DropdownMenuItem>
               <DropdownMenuItem>Cài đặt</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onSwitchAdmin} className="text-indigo-600">
+              <DropdownMenuItem onClick={() => navigate("/admin")} className="text-indigo-600">
                 Chuyển sang Admin
               </DropdownMenuItem>
             </DropdownMenuContent>
