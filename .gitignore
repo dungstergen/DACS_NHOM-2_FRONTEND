@@ -7,17 +7,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
 # Dependency directories
 node_modules/
 jspm_packages/
 web_modules/
 
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
 # TypeScript cache
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 
-# Output directory (Vite build)
+# Vite cache & build output
+.vite/
 dist/
 dist-ssr/
+
+# ESLint & Stylelint cache
+.eslintcache
+.stylelintcache
 
 # IDEs and editors
 .idea/
@@ -27,12 +47,18 @@ dist-ssr/
 *.njsproj
 *.sln
 *.sw?
+*.code-workspace
+.history/
 
 # Operating System Files
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# Environment variables
+# Environment variables (DO NOT commit API keys/secrets)
 .env
 .env.local
 .env.development.local
@@ -42,3 +68,9 @@ Thumbs.db
 
 # pnpm store
 .pnpm-store/
+
+# AI agent workspace config/cache directories
+.gemini/
+.antigravity/
+.cortex/
+.cursorrules
