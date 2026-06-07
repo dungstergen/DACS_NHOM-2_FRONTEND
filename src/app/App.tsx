@@ -10,9 +10,14 @@ import { AuthPage } from "./components/pages/AuthPage";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { Dashboard } from "./components/admin/Dashboard";
 import { RoomsManage } from "./components/admin/RoomsManage";
-import {
-  Appointments, Deposits, Contracts, Invoices, SystemCosts, BlogManage, Reports,
-} from "./components/admin/Other";
+import { AmenitiesManage } from "./components/admin/AmenitiesManage";
+import { Appointments } from "./components/admin/Appointments";
+import { Deposits } from "./components/admin/Deposits";
+import { Contracts } from "./components/admin/Contracts";
+import { Invoices } from "./components/admin/Invoices";
+import { SystemCosts } from "./components/admin/SystemCosts";
+import { BlogManage } from "./components/admin/BlogManage";
+import { Reports } from "./components/admin/Reports";
 
 export default function App() {
   return (
@@ -34,6 +39,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="amenities" element={<AmenitiesManage />} />
           <Route path="rooms" element={<RoomsManage />} />
           <Route path="appointments" element={<Appointments />} />
           <Route path="deposits" element={<Deposits />} />

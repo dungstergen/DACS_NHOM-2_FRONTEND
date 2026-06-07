@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Home, Calendar, Wallet, FileText, Receipt,
-  Settings2, BookOpen, Flag, LogOut, Search, Bell, ChevronRight,
+  Settings2, BookOpen, Flag, LogOut, Search, Bell, ChevronRight, Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
@@ -22,19 +22,25 @@ export function AdminLayout() {
       items: [{ k: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
     },
     {
-      label: "Quản lý phòng",
+      label: "Vận hành & Cho thuê",
       items: [
-        { k: "rooms", label: "Danh sách phòng", icon: Home },
-        { k: "appointments", label: "Lịch hẹn xem phòng", icon: Calendar },
-        { k: "deposits", label: "Đặt cọc", icon: Wallet },
-        { k: "contracts", label: "Hợp đồng thuê", icon: FileText },
-        { k: "invoices", label: "Hóa đơn tháng", icon: Receipt },
+        { k: "amenities", label: "1. Quản lý tiện ích", icon: Sparkles },
+        { k: "rooms", label: "2. Danh sách phòng", icon: Home },
+        { k: "costs", label: "3. Chi phí hệ thống", icon: Settings2 },
+        { k: "contracts", label: "4. Hợp đồng thuê", icon: FileText },
+        { k: "invoices", label: "5. Hóa đơn tháng", icon: Receipt },
       ],
     },
     {
-      label: "Hệ thống",
+      label: "Yêu cầu của khách",
       items: [
-        { k: "costs", label: "Chi phí hệ thống", icon: Settings2 },
+        { k: "appointments", label: "Lịch hẹn xem phòng", icon: Calendar },
+        { k: "deposits", label: "Quản lý đặt cọc", icon: Wallet },
+      ],
+    },
+    {
+      label: "Nội dung & Khác",
+      items: [
         { k: "blog", label: "Quản lý blog", icon: BookOpen },
         { k: "reports", label: "Báo cáo vi phạm", icon: Flag },
       ],

@@ -1,12 +1,46 @@
 import { useState } from "react";
 import { Mail, Lock, User, Phone, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Separator } from "../ui/separator";
+import { useLogin } from "../../../hook/useAuth";
 
 export function AuthPage() {
+  const navigate = useNavigate();
+  const { mutate: login, isPending } = useLogin();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    if (!email || !password) {
+      toast.error("Vui lòng điền đầy đủ email và mật khẩu");
+      return;
+    }
+
+    login(
+      { email, password },
+      {
+        onSuccess: (response) => {
+          toast.success(`Chào mừng ${response.data.full_name} đã quay trở lại!`);
+          if (response.data.role === "admin") {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        },
+        onError: (error: any) => {
+          const message = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+          toast.error(message);
+        },
+      }
+    );
+  };
+
   return (
     <div className="min-h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2">
       {/* LEFT - illustration panel */}
@@ -52,18 +86,35 @@ export function AuthPage() {
                   <Label>Email</Label>
                   <div className="relative mt-1">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input className="pl-9" placeholder="ban@email.com" />
+                    <Input 
+                      className="pl-9" 
+                      placeholder="ban@email.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center justify-between"><Label>Mật khẩu</Label><a className="text-xs text-indigo-600">Quên?</a></div>
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="password" className="pl-9" placeholder="••••••••" />
+                    <Input 
+                      type="password" 
+                      className="pl-9" 
+                      placeholder="••••••••" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
-              <Button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full">Đăng nhập</Button>
+              <Button 
+                onClick={handleLogin}
+                disabled={isPending}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
+              >
+                {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+              </Button>
               <div className="flex items-center gap-3"><Separator className="flex-1" /><span className="text-xs text-muted-foreground">hoặc</span><Separator className="flex-1" /></div>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" className="rounded-full">Google</Button>
