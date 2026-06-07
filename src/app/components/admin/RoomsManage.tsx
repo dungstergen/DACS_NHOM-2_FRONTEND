@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, Edit3, Trash2, Eye, X, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -18,6 +19,21 @@ import { useAmenities } from "../../../hook/useAmenities";
 import type { Room } from "../../../interface/room.interface";
 import { formatVND } from "../../data/mock";
 
+interface RoomForm {
+  title: string;
+  description: string;
+  address: string;
+  district: string;
+  city: string;
+  price_monthly: number;
+  deposit_amount: number;
+  area_sqm: number;
+  max_occupants: number;
+  status: "available" | "occupied";
+  amenities: number[];
+  images: string[];
+}
+
 export function RoomsManage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -29,20 +45,28 @@ export function RoomsManage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
-  // Form Field States
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [address, setAddress] = useState("");
-  const [district, setDistrict] = useState("");
-  const [city, setCity] = useState("TP.HCM");
-  const [priceMonthly, setPriceMonthly] = useState<number>(0);
-  const [depositAmount, setDepositAmount] = useState<number>(0);
-  const [areaSqm, setAreaSqm] = useState<number>(0);
-  const [maxOccupants, setMaxOccupants] = useState<number>(1);
-  const [status, setStatus] = useState<"available" | "occupied">("available");
-  const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
+
+  // React-hook-form
+  const { register, handleSubmit, reset, setValue, watch } = useForm<RoomForm>({
+    defaultValues: {
+      title: "",
+      description: "",
+      address: "",
+      district: "",
+      city: "TP.HCM",
+      price_monthly: 0,
+      deposit_amount: 0,
+      area_sqm: 0,
+      max_occupants: 1,
+      status: "available",
+      amenities: [],
+      images: [],
+    },
+  });
+
+  const watchedAmenities = watch("amenities") || [];
+  const watchedImages = watch("images") || [];
 
   // React Query Hooks
   const { data, isLoading, isError, error } = useRooms(page, {
@@ -61,35 +85,41 @@ export function RoomsManage() {
   const meta = data?.meta;
 
   const openAddModal = () => {
-    setTitle("");
-    setDescription("");
-    setAddress("");
-    setDistrict("");
-    setCity("TP.HCM");
-    setPriceMonthly(0);
-    setDepositAmount(0);
-    setAreaSqm(0);
-    setMaxOccupants(1);
-    setStatus("available");
-    setSelectedAmenities([]);
-    setImageUrls([]);
+    reset({
+      title: "",
+      description: "",
+      address: "",
+      district: "",
+      city: "TP.HCM",
+      price_monthly: 0,
+      deposit_amount: 0,
+      area_sqm: 0,
+      max_occupants: 1,
+      status: "available",
+      amenities: [],
+      images: [],
+    });
+    setNewImageUrl("");
     setIsAddModalOpen(true);
   };
 
   const openEditModal = (room: Room) => {
     setSelectedRoom(room);
-    setTitle(room.title);
-    setDescription(room.description || "");
-    setAddress(room.address || "");
-    setDistrict(room.district || "");
-    setCity(room.city || "TP.HCM");
-    setPriceMonthly(Number(room.price_monthly));
-    setDepositAmount(Number(room.deposit_amount) || 0);
-    setAreaSqm(Number(room.area_sqm) || 0);
-    setMaxOccupants(room.max_occupants || 1);
-    setStatus(room.status);
-    setSelectedAmenities(room.amenities?.map((am) => am.id) || []);
-    setImageUrls(room.images?.map((img) => img.url) || []);
+    reset({
+      title: room.title,
+      description: room.description || "",
+      address: room.address || "",
+      district: room.district || "",
+      city: room.city || "TP.HCM",
+      price_monthly: Number(room.price_monthly),
+      deposit_amount: Number(room.deposit_amount) || 0,
+      area_sqm: Number(room.area_sqm) || 0,
+      max_occupants: room.max_occupants || 1,
+      status: room.status,
+      amenities: room.amenities?.map((am) => am.id) || [],
+      images: room.images?.map((img) => img.url) || [],
+    });
+    setNewImageUrl("");
     setIsEditModalOpen(true);
   };
 
@@ -98,30 +128,30 @@ export function RoomsManage() {
     setIsViewModalOpen(true);
   };
 
-  const handleAddRoom = () => {
-    if (!title.trim()) {
+  const onAddSubmit = (formData: RoomForm) => {
+    if (!formData.title.trim()) {
       toast.error("Vui lòng nhập tên phòng");
       return;
     }
-    if (priceMonthly <= 0) {
+    if (formData.price_monthly <= 0) {
       toast.error("Giá thuê phải lớn hơn 0");
       return;
     }
 
     createRoom(
       {
-        title: title.trim(),
-        description: description.trim() || null,
-        address: address.trim() || null,
-        district: district.trim() || null,
-        city: city.trim() || null,
-        price_monthly: priceMonthly,
-        deposit_amount: depositAmount,
-        area_sqm: areaSqm || null,
-        max_occupants: maxOccupants || null,
-        status,
-        amenities: selectedAmenities,
-        images: imageUrls.map((url, idx) => ({ url, sort_order: idx })),
+        title: formData.title.trim(),
+        description: formData.description.trim() || null,
+        address: formData.address.trim() || null,
+        district: formData.district.trim() || null,
+        city: formData.city.trim() || null,
+        price_monthly: formData.price_monthly,
+        deposit_amount: formData.deposit_amount,
+        area_sqm: formData.area_sqm || null,
+        max_occupants: formData.max_occupants || null,
+        status: formData.status,
+        amenities: formData.amenities,
+        images: formData.images.map((url, idx) => ({ url, sort_order: idx })),
       },
       {
         onSuccess: () => {
@@ -136,13 +166,13 @@ export function RoomsManage() {
     );
   };
 
-  const handleSaveEditRoom = () => {
+  const onEditSubmit = (formData: RoomForm) => {
     if (!selectedRoom) return;
-    if (!title.trim()) {
+    if (!formData.title.trim()) {
       toast.error("Vui lòng nhập tên phòng");
       return;
     }
-    if (priceMonthly <= 0) {
+    if (formData.price_monthly <= 0) {
       toast.error("Giá thuê phải lớn hơn 0");
       return;
     }
@@ -151,18 +181,18 @@ export function RoomsManage() {
       {
         id: selectedRoom.id,
         data: {
-          title: title.trim(),
-          description: description.trim() || null,
-          address: address.trim() || null,
-          district: district.trim() || null,
-          city: city.trim() || null,
-          price_monthly: priceMonthly,
-          deposit_amount: depositAmount,
-          area_sqm: areaSqm || null,
-          max_occupants: maxOccupants || null,
-          status,
-          amenities: selectedAmenities,
-          images: imageUrls.map((url, idx) => ({ url, sort_order: idx })),
+          title: formData.title.trim(),
+          description: formData.description.trim() || null,
+          address: formData.address.trim() || null,
+          district: formData.district.trim() || null,
+          city: formData.city.trim() || null,
+          price_monthly: formData.price_monthly,
+          deposit_amount: formData.deposit_amount,
+          area_sqm: formData.area_sqm || null,
+          max_occupants: formData.max_occupants || null,
+          status: formData.status,
+          amenities: formData.amenities,
+          images: formData.images.map((url, idx) => ({ url, sort_order: idx })),
         },
       },
       {
@@ -237,7 +267,7 @@ export function RoomsManage() {
       <Modal
         title={<span className="text-xl font-bold text-slate-800">{isAddModalOpen ? "Thêm phòng mới" : "Cập nhật phòng"}</span>}
         open={isAddModalOpen || isEditModalOpen}
-        onOk={isAddModalOpen ? handleAddRoom : handleSaveEditRoom}
+        onOk={isAddModalOpen ? handleSubmit(onAddSubmit) : handleSubmit(onEditSubmit)}
         onCancel={() => {
           setIsAddModalOpen(false);
           setIsEditModalOpen(false);
@@ -254,9 +284,8 @@ export function RoomsManage() {
               <Label htmlFor="room-title">Tên phòng trọ *</Label>
               <Input
                 id="room-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ví dụ: Phòng studio ban công Q.10 full nội thất"
+                {...register("title")}
               />
             </div>
 
@@ -265,9 +294,8 @@ export function RoomsManage() {
               <Input
                 id="room-price"
                 type="number"
-                value={priceMonthly || ""}
-                onChange={(e) => setPriceMonthly(Number(e.target.value))}
                 placeholder="Ví dụ: 4500000"
+                {...register("price_monthly", { valueAsNumber: true })}
               />
             </div>
 
@@ -276,9 +304,8 @@ export function RoomsManage() {
               <Input
                 id="room-deposit"
                 type="number"
-                value={depositAmount || ""}
-                onChange={(e) => setDepositAmount(Number(e.target.value))}
                 placeholder="Ví dụ: 4500000"
+                {...register("deposit_amount", { valueAsNumber: true })}
               />
             </div>
 
@@ -287,9 +314,8 @@ export function RoomsManage() {
               <Input
                 id="room-area"
                 type="number"
-                value={areaSqm || ""}
-                onChange={(e) => setAreaSqm(Number(e.target.value))}
                 placeholder="Ví dụ: 25"
+                {...register("area_sqm", { valueAsNumber: true })}
               />
             </div>
 
@@ -298,15 +324,17 @@ export function RoomsManage() {
               <Input
                 id="room-occupants"
                 type="number"
-                value={maxOccupants || ""}
-                onChange={(e) => setMaxOccupants(Number(e.target.value))}
                 placeholder="Ví dụ: 2"
+                {...register("max_occupants", { valueAsNumber: true })}
               />
             </div>
 
             <div>
               <Label htmlFor="room-status">Trạng thái</Label>
-              <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+              <Select 
+                value={watch("status")} 
+                onValueChange={(val: any) => setValue("status", val)}
+              >
                 <SelectTrigger className="w-full rounded-lg bg-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -321,9 +349,8 @@ export function RoomsManage() {
               <Label htmlFor="room-city">Thành phố</Label>
               <Input
                 id="room-city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
                 placeholder="Ví dụ: TP.HCM"
+                {...register("city")}
               />
             </div>
 
@@ -331,9 +358,8 @@ export function RoomsManage() {
               <Label htmlFor="room-district">Quận / Huyện</Label>
               <Input
                 id="room-district"
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
                 placeholder="Ví dụ: Quận 10"
+                {...register("district")}
               />
             </div>
 
@@ -341,9 +367,8 @@ export function RoomsManage() {
               <Label htmlFor="room-address">Địa chỉ chi tiết (Số nhà, Tên đường...)</Label>
               <Input
                 id="room-address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
                 placeholder="Ví dụ: 12 Lý Thường Kiệt, P.7"
+                {...register("address")}
               />
             </div>
 
@@ -351,11 +376,10 @@ export function RoomsManage() {
               <Label htmlFor="room-desc">Mô tả chi tiết</Label>
               <textarea
                 id="room-desc"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Mô tả thông tin chi tiết về phòng trọ, quy định, giờ giấc..."
+                {...register("description")}
               />
             </div>
           </div>
@@ -369,12 +393,12 @@ export function RoomsManage() {
                   <label key={am.id} className="flex items-center gap-2 text-sm cursor-pointer hover:text-indigo-600 transition-colors">
                     <input
                       type="checkbox"
-                      checked={selectedAmenities.includes(am.id)}
+                      checked={watchedAmenities.includes(am.id)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedAmenities([...selectedAmenities, am.id]);
+                          setValue("amenities", [...watchedAmenities, am.id]);
                         } else {
-                          setSelectedAmenities(selectedAmenities.filter((id) => id !== am.id));
+                          setValue("amenities", watchedAmenities.filter((id) => id !== am.id));
                         }
                       }}
                       className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300"
@@ -401,7 +425,7 @@ export function RoomsManage() {
                 type="button"
                 onClick={() => {
                   if (newImageUrl.trim()) {
-                    setImageUrls([...imageUrls, newImageUrl.trim()]);
+                    setValue("images", [...watchedImages, newImageUrl.trim()]);
                     setNewImageUrl("");
                   }
                 }}
@@ -412,14 +436,14 @@ export function RoomsManage() {
               </Button>
             </div>
 
-            {imageUrls.length > 0 && (
+            {watchedImages.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border border-border p-2 rounded-xl">
-                {imageUrls.map((url, idx) => (
+                {watchedImages.map((url, idx) => (
                   <div key={idx} className="relative group aspect-[4/3] rounded-lg overflow-hidden border border-border">
                     <img src={url} className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== idx))}
+                      onClick={() => setValue("images", watchedImages.filter((_, i) => i !== idx))}
                       className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="w-3.5 h-3.5" />

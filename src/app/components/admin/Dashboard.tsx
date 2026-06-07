@@ -1,11 +1,11 @@
 import { TrendingUp, TrendingDown, Home, Calendar, Wallet, Users, ArrowUpRight } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, BarChart, Bar,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { DASHBOARD_REVENUE, OCCUPANCY_DATA, APPOINTMENTS, formatVND } from "../../data/mock";
+import { DASHBOARD_REVENUE, OCCUPANCY_DATA, APPOINTMENTS } from "../../data/mock";
 
 export function Dashboard() {
   const stats = [

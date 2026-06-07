@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Trash2, Edit3, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -14,14 +15,29 @@ import {
 } from "../../../hook/useAmenities";
 import type { Amenity } from "../../../interface/amenity.interface";
 
+interface AddAmenityForm {
+  newName: string;
+}
+
+interface EditAmenityForm {
+  editingName: string;
+}
+
 export function AmenitiesManage() {
   const [page, setPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newName, setNewName] = useState("");
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingName, setEditingName] = useState("");
+
+  // React-hook-form
+  const { register: registerAdd, handleSubmit: handleSubmitAdd, reset: resetAdd } = useForm<AddAmenityForm>({
+    defaultValues: { newName: "" },
+  });
+
+  const { register: registerEdit, handleSubmit: handleSubmitEdit, reset: resetEdit } = useForm<EditAmenityForm>({
+    defaultValues: { editingName: "" },
+  });
 
   // React Query Hooks
   const { data, isLoading, isError, error } = useAmenities(page);
@@ -32,14 +48,14 @@ export function AmenitiesManage() {
   const amenities = data?.data || [];
   const meta = data?.meta;
 
-  const handleAdd = () => {
-    if (!newName.trim()) {
+  const onAddSubmit = (formData: AddAmenityForm) => {
+    if (!formData.newName.trim()) {
       toast.error("Vui lòng nhập tên tiện ích");
       return;
     }
-    createAmenity(newName.trim(), {
+    createAmenity(formData.newName.trim(), {
       onSuccess: () => {
-        setNewName("");
+        resetAdd({ newName: "" });
         setIsAddModalOpen(false);
         toast.success("Đã thêm tiện ích mới");
       },
@@ -52,24 +68,24 @@ export function AmenitiesManage() {
 
   const handleStartEdit = (amenity: Amenity) => {
     setEditingId(amenity.id);
-    setEditingName(amenity.name);
+    resetEdit({ editingName: amenity.name });
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    if (!editingName.trim()) {
+  const onEditSubmit = (formData: EditAmenityForm) => {
+    if (!formData.editingName.trim()) {
       toast.error("Tên tiện ích không được để trống");
       return;
     }
     if (editingId === null) return;
 
     updateAmenity(
-      { id: editingId, name: editingName.trim() },
+      { id: editingId, name: formData.editingName.trim() },
       {
         onSuccess: () => {
           setIsEditModalOpen(false);
           setEditingId(null);
-          setEditingName("");
+          resetEdit({ editingName: "" });
           toast.success("Cập nhật tiện ích thành công");
         },
         onError: (err: any) => {
@@ -108,9 +124,9 @@ export function AmenitiesManage() {
       <Modal
         title={<span className="text-lg font-semibold text-slate-800">Thêm tiện ích mới</span>}
         open={isAddModalOpen}
-        onOk={handleAdd}
+        onOk={handleSubmitAdd(onAddSubmit)}
         onCancel={() => {
-          setNewName("");
+          resetAdd({ newName: "" });
           setIsAddModalOpen(false);
         }}
         confirmLoading={isCreating}
@@ -121,10 +137,9 @@ export function AmenitiesManage() {
           <Label htmlFor="new-amenity-name">Tên tiện ích</Label>
           <Input
             id="new-amenity-name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
             placeholder="Ví dụ: Thang máy, Máy sấy tóc..."
             disabled={isCreating}
+            {...registerAdd("newName")}
           />
         </div>
       </Modal>
@@ -133,11 +148,11 @@ export function AmenitiesManage() {
       <Modal
         title={<span className="text-lg font-semibold text-slate-800">Cập nhật tiện ích</span>}
         open={isEditModalOpen}
-        onOk={handleSaveEdit}
+        onOk={handleSubmitEdit(onEditSubmit)}
         onCancel={() => {
           setIsEditModalOpen(false);
           setEditingId(null);
-          setEditingName("");
+          resetEdit({ editingName: "" });
         }}
         confirmLoading={isUpdating}
         okText="Cập nhật"
@@ -147,10 +162,9 @@ export function AmenitiesManage() {
           <Label htmlFor="edit-amenity-name">Tên tiện ích</Label>
           <Input
             id="edit-amenity-name"
-            value={editingName}
-            onChange={(e) => setEditingName(e.target.value)}
             placeholder="Tên tiện ích..."
             disabled={isUpdating}
+            {...registerEdit("editingName")}
           />
         </div>
       </Modal>

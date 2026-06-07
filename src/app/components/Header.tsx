@@ -1,4 +1,4 @@
-import { Home, Search, Heart, MessageCircle, Bell, Menu } from "lucide-react";
+import { Home, Heart, Bell, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";

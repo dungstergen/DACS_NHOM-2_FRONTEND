@@ -1,4 +1,4 @@
-import { FileText, Receipt, Home, Download, Calendar, MapPin, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { FileText, Receipt, Home, Download, MapPin, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Badge } from "../ui/badge";
