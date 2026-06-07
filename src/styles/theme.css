@@ -179,3 +179,87 @@
     line-height: 1.5;
   }
 }
+
+/* Ant Design Custom Reset Styles */
+.ant-modal-content {
+  box-shadow: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+}
+
+.ant-popover-inner {
+  box-shadow: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+}
+
+/* Fix Tailwind button & alignment conflicts inside Ant Design Popover */
+.ant-popover-buttons {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+}
+
+.ant-popover-buttons button {
+  height: auto !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  border-radius: 9999px !important; /* Pill shape */
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.ant-popover-buttons .ant-btn-primary {
+  background: #ef4444 !important; /* Rose-500 danger color */
+  color: white !important;
+}
+
+.ant-popover-buttons .ant-btn-primary:hover {
+  background: #dc2626 !important; /* Rose-600 */
+}
+
+.ant-popover-buttons .ant-btn-default {
+  background: #f1f5f9 !important; /* Slate-100 */
+  color: #334155 !important;
+}
+
+.ant-popover-buttons .ant-btn-default:hover {
+  background: #e2e8f0 !important; /* Slate-200 */
+}
+
+/* Fix Tailwind button conflicts inside Ant Design Modal footer */
+.ant-modal-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-top: 16px !important;
+}
+
+.ant-modal-footer button {
+  height: auto !important;
+  padding: 6px 16px !important;
+  font-size: 14px !important;
+  border-radius: 9999px !important; /* Pill shape */
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.ant-modal-footer .ant-btn-primary {
+  background: #4f46e5 !important; /* Indigo-600 */
+  color: white !important;
+}
+
+.ant-modal-footer .ant-btn-primary:hover {
+  background: #4338ca !important; /* Indigo-700 */
+}
+
+.ant-modal-footer .ant-btn-default {
+  background: #f1f5f9 !important; /* Slate-100 */
+  color: #334155 !important;
+}
+
+.ant-modal-footer .ant-btn-default:hover {
+  background: #e2e8f0 !important; /* Slate-200 */
+}

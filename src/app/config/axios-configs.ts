@@ -66,7 +66,7 @@ export const post = <T>({
     config?: AxiosRequestConfig
 }): Promise<T> => api.post(url, data, config)
 
-export const update = ({
+export const update = <T = any>({
     url,
     data,
     config
@@ -74,6 +74,12 @@ export const update = ({
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-}) => api.put(url, data, config)
+}): Promise<T> => api.put(url, data, config) as unknown as Promise<T>;
 
-export const remove = ({ url }: { url: string }) => api.delete(url)
+export const remove = <T = any>({
+    url,
+    config
+}: {
+    url: string,
+    config?: AxiosRequestConfig
+}): Promise<T> => api.delete(url, config) as unknown as Promise<T>;

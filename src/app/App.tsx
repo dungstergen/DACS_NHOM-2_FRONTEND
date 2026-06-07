@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router";
-import { Toaster } from "./components/ui/sonner";
+import { Toaster } from "sonner";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { HomePage } from "./components/pages/HomePage";
 import { RoomsPage } from "./components/pages/RoomsPage";
@@ -50,7 +50,7 @@ export default function App() {
           <Route path="reports" element={<Reports />} />
         </Route>
       </Routes>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" richColors />
     </>
   );
 }
