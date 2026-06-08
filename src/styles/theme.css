@@ -270,3 +270,13 @@
 .ant-modal-footer .ant-btn-default:hover {
   background: #e2e8f0 !important; /* Slate-200 */
 }
+
+/* Tắt bóng viền ngoài (glow/focus shadow) của các ô nhập liệu Ant Design */
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused,
+.ant-input-number-focused {
+  box-shadow: none !important;
+}
+

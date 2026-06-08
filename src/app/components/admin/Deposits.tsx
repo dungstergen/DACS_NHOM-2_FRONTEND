@@ -534,7 +534,7 @@ export function Deposits() {
             <span>Xác nhận thanh toán đặt cọc</span>
           </div>
         }
-        visible={paymentModalOpen}
+        open={paymentModalOpen}
         onCancel={() => {
           setPaymentModalOpen(false);
           setSelectedOrder(null);
@@ -618,7 +618,7 @@ export function Deposits() {
             <span>Chi tiết đơn đăng ký thuê phòng</span>
           </div>
         }
-        visible={detailsModalOpen}
+        open={detailsModalOpen}
         onCancel={() => {
           setDetailsModalOpen(false);
           setDetailsOrder(null);

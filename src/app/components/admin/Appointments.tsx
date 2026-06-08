@@ -463,7 +463,7 @@ export function Appointments() {
             <span>Chi tiết ghi chú lịch hẹn</span>
           </div>
         }
-        visible={isNoteOpen}
+        open={isNoteOpen}
         onCancel={() => setIsNoteOpen(false)}
         footer={[
           <Button key="close" type="primary" onClick={() => setIsNoteOpen(false)} className="rounded-full">
