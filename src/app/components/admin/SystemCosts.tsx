@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
@@ -15,31 +14,22 @@ interface SystemCostsForm {
 }
 
 export function SystemCosts() {
-  const { register, handleSubmit, reset } = useForm<SystemCostsForm>({
-    defaultValues: {
-      electricity_price: 0,
-      water_price: 0,
-      internet_price: 0,
-      trash_price: 0,
-      parking_price: 0,
-    },
-  });
-
   // React Query Hooks
   const { data: config, isLoading, isError, error } = useBillingConfig();
   const { mutate: updateConfig, isPending: isUpdating } = useUpdateBillingConfig();
 
-  useEffect(() => {
-    if (config) {
-      reset({
-        electricity_price: Number(config.electricity_price),
-        water_price: Number(config.water_price),
-        internet_price: Number(config.internet_price),
-        trash_price: Number(config.trash_price),
-        parking_price: Number(config.parking_price),
-      });
-    }
-  }, [config, reset]);
+  // Hỗ trợ cả trường hợp API trả về trực tiếp hoặc bọc trong object data
+  const apiData = (config as any)?.data || config;
+
+  const { register, handleSubmit } = useForm<SystemCostsForm>({
+    values: apiData ? {
+      electricity_price: Number(apiData.electricity_price ?? 0),
+      water_price: Number(apiData.water_price ?? 0),
+      internet_price: Number(apiData.internet_price ?? 0),
+      trash_price: Number(apiData.trash_price ?? 0),
+      parking_price: Number(apiData.parking_price ?? 0),
+    } : undefined
+  });
 
   const onSubmit = (formData: SystemCostsForm) => {
     if (

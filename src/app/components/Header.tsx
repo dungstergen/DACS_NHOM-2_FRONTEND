@@ -44,11 +44,10 @@ export function Header() {
               <Link
                 key={it.id}
                 to={it.id}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  (it.id === "/" ? location.pathname === "/" : location.pathname.startsWith(it.id))
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
+                className={`px-4 py-2 rounded-full transition-colors ${(it.id === "/" ? location.pathname === "/" : location.pathname.startsWith(it.id))
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
               >
                 {it.label}
               </Link>
@@ -82,10 +81,6 @@ export function Header() {
               <DropdownMenuItem onClick={() => navigate("/myrooms")}>Phòng của tôi</DropdownMenuItem>
               <DropdownMenuItem>Yêu thích</DropdownMenuItem>
               <DropdownMenuItem>Cài đặt</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/admin")} className="text-indigo-600">
-                Chuyển sang Admin
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
