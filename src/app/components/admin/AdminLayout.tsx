@@ -1,16 +1,14 @@
 import {
   LayoutDashboard, Home, Calendar, Wallet, FileText, Receipt,
-  Settings2, BookOpen, Flag, LogOut, Search, Bell, ChevronRight, Sparkles,
+  Settings2, BookOpen, Flag, Search, Bell, ChevronRight, Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
-import { Link, useLocation, useNavigate, Outlet } from "react-router";
+import { Link, useLocation, Outlet } from "react-router";
 
 export function AdminLayout() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
+  const location = useLocation()
   // Extract the current path segment for the admin route (e.g. "dashboard", "rooms")
   // If location.pathname is "/admin/rooms", pathKey is "rooms"
   // If location.pathname is "/admin", pathKey is "dashboard" (default)
@@ -79,11 +77,10 @@ export function AdminLayout() {
                       <Link
                         key={it.k}
                         to={`/admin/${it.k}`}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                          active
-                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${active
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
                       >
                         <Icon className="w-4 h-4" />
                         <span>{it.label}</span>
@@ -94,15 +91,6 @@ export function AdminLayout() {
               </div>
             ))}
           </nav>
-
-          <div className="p-3 border-t border-border space-y-1">
-            <button
-              onClick={() => navigate("/")}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" /> Về trang người dùng
-            </button>
-          </div>
         </aside>
 
         {/* MAIN */}

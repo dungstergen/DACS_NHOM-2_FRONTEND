@@ -83,3 +83,13 @@ export const remove = <T = any>({
     url: string,
     config?: AxiosRequestConfig
 }): Promise<T> => api.delete(url, config) as unknown as Promise<T>;
+
+export const patch = <T = any>({
+    url,
+    data,
+    config
+}: {
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+}): Promise<T> => api.patch(url, data, config) as unknown as Promise<T>;
