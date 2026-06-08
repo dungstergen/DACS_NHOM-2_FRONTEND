@@ -181,8 +181,13 @@
 }
 
 /* Ant Design Custom Reset Styles */
-.ant-modal-content {
+.ant-modal-content,
+.ant-modal-wrap,
+div[class*="ant-modal"] {
   box-shadow: none !important;
+}
+
+.ant-modal-content {
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: 16px !important;
 }
@@ -215,6 +220,7 @@
   font-size: 13px !important;
   border-radius: 9999px !important; /* Pill shape */
   border: none !important;
+  box-shadow: none !important;
   cursor: pointer !important;
 }
 
@@ -250,6 +256,7 @@
   font-size: 14px !important;
   border-radius: 9999px !important; /* Pill shape */
   border: none !important;
+  box-shadow: none !important;
   cursor: pointer !important;
 }
 
@@ -272,11 +279,23 @@
 }
 
 /* Tắt bóng viền ngoài (glow/focus shadow) của các ô nhập liệu Ant Design */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker,
+.ant-input-number,
+.ant-btn,
+[class^="ant-"] {
+  box-shadow: none !important;
+}
+
 .ant-input:focus,
 .ant-input-focused,
+.ant-input-affix-wrapper-focused,
 .ant-select-focused .ant-select-selector,
 .ant-picker-focused,
 .ant-input-number-focused {
   box-shadow: none !important;
+  outline: none !important;
 }
 

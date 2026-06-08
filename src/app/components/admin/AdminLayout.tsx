@@ -1,11 +1,12 @@
 import {
   LayoutDashboard, Home, Calendar, Wallet, FileText, Receipt,
-  Settings2, BookOpen, Flag, Search, Bell, ChevronRight, Sparkles,
+  Settings2, BookOpen, Flag, Search, Bell, ChevronRight, Sparkles, LogOut
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Link, useLocation, Outlet } from "react-router";
+import { Dropdown, type MenuProps } from "antd";
 
 export function AdminLayout() {
   const location = useLocation()
@@ -13,6 +14,27 @@ export function AdminLayout() {
   // If location.pathname is "/admin/rooms", pathKey is "rooms"
   // If location.pathname is "/admin", pathKey is "dashboard" (default)
   const pathKey = location.pathname.split("/").filter(Boolean)[1] || "dashboard";
+
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : { name: "Admin" };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    window.location.href = "/auth";
+  };
+
+  const userMenu: MenuProps['items'] = [
+    {
+      key: '1',
+      label: (
+        <div className="flex items-center gap-2 text-rose-600 px-2 py-1" onClick={handleLogout}>
+          <LogOut className="w-4 h-4" />
+          <span>Đăng xuất</span>
+        </div>
+      ),
+    },
+  ];
 
   const groups = [
     {
@@ -109,10 +131,15 @@ export function AdminLayout() {
                 <Bell className="w-5 h-5" />
                 <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 bg-pink-500 border-0">5</Badge>
               </button>
-              <Avatar className="w-9 h-9">
-                <AvatarImage src="https://i.pravatar.cc/100?img=8" />
-                <AvatarFallback>A</AvatarFallback>
-              </Avatar>
+              <Dropdown menu={{ items: userMenu }} placement="bottomRight" trigger={['click']}>
+                <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-1 rounded-full pl-3 transition-colors">
+                  <span className="text-sm">{user?.name || "Admin"}</span>
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src="https://i.pravatar.cc/100?img=8" />
+                    <AvatarFallback>{(user?.name || "A").charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </div>
+              </Dropdown>
             </div>
           </header>
 

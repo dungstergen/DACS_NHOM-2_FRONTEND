@@ -1,18 +1,52 @@
-import { TrendingUp, TrendingDown, Home, Calendar, Wallet, Users, ArrowUpRight } from "lucide-react";
+import { useState } from "react";
+import { Home, Wallet, Users, ArrowUpRight } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
+import { DatePicker, Spin, Tag, Card } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { Badge } from "../ui/badge";
-import { DASHBOARD_REVENUE, OCCUPANCY_DATA, APPOINTMENTS } from "../../data/mock";
+import { DASHBOARD_REVENUE, APPOINTMENTS } from "../../data/mock";
+import { useDashboardSummary } from "../../../hook/useDashboard";
 
 export function Dashboard() {
-  const stats = [
-    { label: "Doanh thu tháng", value: "276M ₫", change: "+12.4%", up: true, icon: Wallet, color: "from-indigo-500 to-purple-500" },
-    { label: "Phòng đang quản lý", value: "66", change: "+3", up: true, icon: Home, color: "from-emerald-500 to-teal-500" },
-    { label: "Lịch hẹn tuần này", value: "28", change: "+8", up: true, icon: Calendar, color: "from-amber-500 to-orange-500" },
-    { label: "Tỷ lệ lấp đầy", value: "78%", change: "-2.1%", up: false, icon: Users, color: "from-pink-500 to-rose-500" },
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(undefined);
+  const { data, isLoading } = useDashboardSummary(selectedMonth);
+
+  const handleMonthChange = (_date: Dayjs | null, dateString: string | null) => {
+    setSelectedMonth(dateString as string || undefined);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  const summary = data;
+
+  const totalRevenue = summary?.finance.total_revenue || 0;
+  const pendingBills = summary?.finance.pending_bills || 0;
+  const totalRooms = summary?.operations.total_rooms || 0;
+  const occupiedRooms = summary?.operations.occupied_rooms || 0;
+  const availableRooms = summary?.operations.available_rooms || 0;
+  const totalUsers = summary?.operations.total_users || 0;
+
+  const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
+
+  const pieData = [
+    { name: "Đã thuê", value: occupiedRooms, color: "#6366f1" },
+    { name: "Trống", value: availableRooms, color: "#e2e8f0" },
   ];
 
   return (
@@ -20,26 +54,61 @@ export function Dashboard() {
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl tracking-tight">Tổng quan hệ thống</h1>
-          <p className="text-muted-foreground mt-1">Cập nhật tới hôm nay, 06/05/2026</p>
+          <p className="text-muted-foreground mt-1">
+            {selectedMonth ? `Dữ liệu tháng ${selectedMonth}` : "Dữ liệu toàn thời gian"}
+          </p>
+        </div>
+        <div>
+          <DatePicker
+            picker="month"
+            placeholder="Chọn tháng..."
+            onChange={handleMonthChange}
+            value={selectedMonth ? dayjs(selectedMonth, "YYYY-MM") : null}
+            className="h-10"
+          />
         </div>
       </div>
 
       {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s, i) => (
-          <div key={i} className="relative overflow-hidden p-5 rounded-2xl bg-white border border-border">
-            <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br ${s.color} opacity-10`} />
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center text-white`}>
-              <s.icon className="w-5 h-5" />
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">{s.label}</div>
-            <div className="text-2xl tracking-tight mt-1">{s.value}</div>
-            <div className={`flex items-center gap-1 text-xs mt-2 ${s.up ? "text-emerald-600" : "text-rose-600"}`}>
-              {s.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />} {s.change}
-              <span className="text-muted-foreground">so với tháng trước</span>
-            </div>
+        <Card className="rounded-2xl border-border shadow-none overflow-hidden relative" bodyStyle={{ padding: "20px" }}>
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 opacity-10" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+            <Wallet className="w-5 h-5" />
           </div>
-        ))}
+          <div className="mt-4 text-sm text-muted-foreground">Doanh thu {selectedMonth ? "tháng" : "tổng"}</div>
+          <div className="text-2xl tracking-tight mt-1">{formatCurrency(totalRevenue)}</div>
+        </Card>
+
+        <Card className="rounded-2xl border-border shadow-none overflow-hidden relative" bodyStyle={{ padding: "20px" }}>
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 opacity-10" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white">
+            <Wallet className="w-5 h-5" />
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">Chưa thu (Nợ)</div>
+          <div className="text-2xl tracking-tight mt-1">{formatCurrency(pendingBills)}</div>
+        </Card>
+
+        <Card className="rounded-2xl border-border shadow-none overflow-hidden relative" bodyStyle={{ padding: "20px" }}>
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 opacity-10" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white">
+            <Home className="w-5 h-5" />
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">Phòng đang quản lý</div>
+          <div className="text-2xl tracking-tight mt-1">{totalRooms}</div>
+          <div className="flex items-center gap-1 text-xs mt-2 text-emerald-600">
+            Tỷ lệ lấp đầy: {occupancyRate}%
+          </div>
+        </Card>
+
+        <Card className="rounded-2xl border-border shadow-none overflow-hidden relative" bodyStyle={{ padding: "20px" }}>
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 opacity-10" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
+            <Users className="w-5 h-5" />
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">Khách thuê hệ thống</div>
+          <div className="text-2xl tracking-tight mt-1">{totalUsers}</div>
+        </Card>
       </div>
 
       {/* CHARTS */}
@@ -50,7 +119,7 @@ export function Dashboard() {
               <h3>Doanh thu 7 tháng</h3>
               <p className="text-sm text-muted-foreground">Đơn vị: triệu đồng</p>
             </div>
-            <Badge className="bg-emerald-50 text-emerald-700 border-0">↑ 12.4%</Badge>
+            <Tag color="success" className="border-0 bg-emerald-50 text-emerald-700">↑ 12.4%</Tag>
           </div>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={DASHBOARD_REVENUE}>
@@ -71,17 +140,17 @@ export function Dashboard() {
 
         <div className="rounded-2xl bg-white border border-border p-6">
           <h3 className="mb-1">Trạng thái phòng</h3>
-          <p className="text-sm text-muted-foreground mb-4">Tổng 66 phòng</p>
+          <p className="text-sm text-muted-foreground mb-4">Tổng {totalRooms} phòng</p>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={OCCUPANCY_DATA} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={4}>
-                {OCCUPANCY_DATA.map((d, i) => <Cell key={i} fill={d.color} />)}
+              <Pie data={pieData} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={4}>
+                {pieData.map((d, i) => <Cell key={i} fill={d.color} />)}
               </Pie>
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-2 mt-2">
-            {OCCUPANCY_DATA.map((d) => (
+            {pieData.map((d) => (
               <div key={d.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: d.color }} /> {d.name}</div>
                 <span>{d.value}</span>
@@ -123,17 +192,12 @@ export function Dashboard() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm">{a.date} • {a.time}</div>
-                  <Badge
-                    className={
-                      a.status === "confirmed"
-                        ? "bg-emerald-50 text-emerald-700 border-0"
-                        : a.status === "pending"
-                        ? "bg-amber-50 text-amber-700 border-0"
-                        : "bg-rose-50 text-rose-700 border-0"
-                    }
+                  <Tag
+                    color={a.status === "confirmed" ? "success" : a.status === "pending" ? "warning" : "error"}
+                    className="border-0 mt-1"
                   >
                     {a.status === "confirmed" ? "Đã xác nhận" : a.status === "pending" ? "Chờ duyệt" : "Đã hủy"}
-                  </Badge>
+                  </Tag>
                 </div>
               </div>
             ))}

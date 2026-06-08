@@ -1,13 +1,8 @@
 import { useState } from "react";
-import { Plus, Search, Edit3, Trash2, Eye, X, Loader2 } from "lucide-react";
+import { Plus, Search, Edit3, Trash2, Eye, X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Badge } from "../ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { Modal, Popconfirm } from "antd";
+import { Button, Input, Table, Modal, Popconfirm, Tag, Select, Checkbox, Space, Tooltip } from "antd";
+import type { TableColumnsType } from "antd";
 import { toast } from "sonner";
 import { 
   useRooms, 
@@ -69,7 +64,7 @@ export function RoomsManage() {
   const watchedImages = watch("images") || [];
 
   // React Query Hooks
-  const { data, isLoading, isError, error } = useRooms(page, {
+  const { data, isLoading } = useRooms(page, {
     status: statusFilter,
     q: search || undefined,
   });
@@ -221,51 +216,179 @@ export function RoomsManage() {
     });
   };
 
+  // Antd Table columns configuration
+  const columns: TableColumnsType<Room> = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 70,
+      render: (id) => <span className="font-mono font-medium text-slate-500">#{id}</span>,
+    },
+    {
+      title: "Phòng",
+      key: "room",
+      render: (_, record) => {
+        const imageUrl = record.images && record.images.length > 0 
+          ? record.images[0].url 
+          : "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=300&q=80";
+        const addressText = [record.address, record.district, record.city]
+          .filter(Boolean)
+          .join(", ");
+        return (
+          <div className="flex items-center gap-3">
+            <img 
+              src={imageUrl} 
+              alt={record.title}
+              className="w-12 h-12 rounded-xl object-cover border border-slate-100 shrink-0 shadow-sm" 
+            />
+            <div className="flex flex-col">
+              <span className="font-semibold text-slate-700 line-clamp-1">{record.title}</span>
+              {addressText && (
+                <span className="text-xs text-slate-400 mt-0.5 line-clamp-1">{addressText}</span>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Diện tích",
+      dataIndex: "area_sqm",
+      key: "area_sqm",
+      width: 100,
+      render: (area) => (area ? `${area} m²` : "N/A"),
+    },
+    {
+      title: "Giá thuê",
+      dataIndex: "price_monthly",
+      key: "price_monthly",
+      width: 140,
+      render: (price) => (
+        <span className="text-indigo-600 font-bold">{formatVND(Number(price))}</span>
+      ),
+    },
+    {
+      title: "Khách tối đa",
+      dataIndex: "max_occupants",
+      key: "max_occupants",
+      width: 110,
+      render: (occ) => (occ ? `${occ} người` : "N/A"),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      render: (status) => {
+        const isAvailable = status === "available";
+        return (
+          <Tag color={isAvailable ? "success" : "error"} className="border-0 rounded-full px-2.5 py-0.5 font-medium">
+            {isAvailable ? "Còn trống" : "Đã thuê"}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 140,
+      align: "right",
+      render: (_, record) => (
+        <Space size="middle">
+          <Tooltip title="Xem chi tiết">
+            <Button
+              type="text"
+              icon={<Eye className="w-4 h-4 text-indigo-600" />}
+              onClick={() => openViewModal(record)}
+              className="hover:bg-indigo-50 rounded-full flex items-center justify-center p-0 w-8 h-8"
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              type="text"
+              icon={<Edit3 className="w-4 h-4 text-amber-500" />}
+              onClick={() => openEditModal(record)}
+              className="hover:bg-amber-50 rounded-full flex items-center justify-center p-0 w-8 h-8"
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Xóa phòng trọ"
+            description="Bạn có chắc chắn muốn xóa phòng trọ này?"
+            onConfirm={() => handleDeleteRoom(record.id)}
+            okText="Có"
+            cancelText="Không"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              type="text"
+              danger
+              icon={<Trash2 className="w-4 h-4" />}
+              className="hover:bg-rose-50 rounded-full flex items-center justify-center p-0 w-8 h-8"
+            />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-4">
+      {/* Title block */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl tracking-tight">Quản lý phòng</h1>
-          <p className="text-muted-foreground mt-1">
-            {isLoading ? "Đang tải số lượng phòng..." : `Tổng cộng ${meta?.total || 0} phòng đang hoạt động`}
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-800">Quản lý phòng</h1>
+          <p className="text-slate-500 mt-1">
+            {`Tổng cộng ${meta?.total || 0} phòng đang hoạt động`}
           </p>
         </div>
-        <Button onClick={openAddModal} className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full">
-          <Plus className="w-4 h-4 mr-1" /> Thêm phòng mới
+        <Button
+          onClick={openAddModal}
+          type="primary"
+          className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-10 border-0 flex items-center gap-1.5 shadow-md font-medium"
+        >
+          <Plus className="w-4 h-4" /> Thêm phòng mới
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Filter and search controls */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <div className="relative flex-1 min-w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            className="pl-9 rounded-full bg-white" 
+            prefix={<Search className="w-4 h-4 text-slate-400 mr-1" />} 
             placeholder="Tìm theo tên, địa chỉ..." 
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
             }}
+            className="rounded-full h-10"
+            allowClear
           />
         </div>
-        <Select value={statusFilter} onValueChange={(val) => {
-          setStatusFilter(val);
-          setPage(1);
-        }}>
-          <SelectTrigger className="w-44 rounded-full bg-white">
-            <SelectValue placeholder="Tất cả trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả trạng thái</SelectItem>
-            <SelectItem value="available">Còn trống</SelectItem>
-            <SelectItem value="occupied">Đã thuê</SelectItem>
-          </SelectContent>
-        </Select>
+        <Select 
+          value={statusFilter} 
+          onChange={(val) => {
+            setStatusFilter(val);
+            setPage(1);
+          }}
+          className="w-44 h-10 custom-select-rounded"
+          dropdownClassName="rounded-xl"
+          options={[
+            { value: "all", label: "Tất cả trạng thái" },
+            { value: "available", label: "Còn trống" },
+            { value: "occupied", label: "Đã thuê" }
+          ]}
+        />
       </div>
 
       {/* Add / Edit Room Modal */}
       <Modal
-        title={<span className="text-xl font-bold text-slate-800">{isAddModalOpen ? "Thêm phòng mới" : "Cập nhật phòng"}</span>}
+        title={
+          <span className="text-xl font-bold text-slate-800">
+            {isAddModalOpen ? "Thêm phòng mới" : "Cập nhật phòng"}
+          </span>
+        }
         open={isAddModalOpen || isEditModalOpen}
         onOk={isAddModalOpen ? handleSubmit(onAddSubmit) : handleSubmit(onEditSubmit)}
         onCancel={() => {
@@ -276,175 +399,171 @@ export function RoomsManage() {
         confirmLoading={isCreating || isUpdating}
         okText={isAddModalOpen ? "Thêm mới" : "Lưu thay đổi"}
         cancelText="Hủy"
+        okButtonProps={{ className: "rounded-full h-10 px-5" }}
+        cancelButtonProps={{ className: "rounded-full h-10 px-5" }}
         width={750}
       >
-        <div className="py-4 space-y-4 max-h-[65vh] overflow-y-auto pr-2">
+        <form onSubmit={(e) => e.preventDefault()} className="py-4 space-y-4 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 md:col-span-2">
-              <Label htmlFor="room-title">Tên phòng trọ *</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Tên phòng trọ *</label>
               <Input
-                id="room-title"
                 placeholder="Ví dụ: Phòng studio ban công Q.10 full nội thất"
                 {...register("title")}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-price">Giá thuê hàng tháng (VND) *</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Giá thuê hàng tháng (VND) *</label>
               <Input
-                id="room-price"
                 type="number"
                 placeholder="Ví dụ: 4500000"
                 {...register("price_monthly", { valueAsNumber: true })}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-deposit">Tiền đặt cọc (VND)</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Tiền đặt cọc (VND)</label>
               <Input
-                id="room-deposit"
                 type="number"
                 placeholder="Ví dụ: 4500000"
                 {...register("deposit_amount", { valueAsNumber: true })}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-area">Diện tích (m²)</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Diện tích (m²)</label>
               <Input
-                id="room-area"
                 type="number"
                 placeholder="Ví dụ: 25"
                 {...register("area_sqm", { valueAsNumber: true })}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-occupants">Số người tối đa</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Số người tối đa</label>
               <Input
-                id="room-occupants"
                 type="number"
                 placeholder="Ví dụ: 2"
                 {...register("max_occupants", { valueAsNumber: true })}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-status">Trạng thái</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Trạng thái</label>
               <Select 
                 value={watch("status")} 
-                onValueChange={(val: any) => setValue("status", val)}
-              >
-                <SelectTrigger className="w-full rounded-lg bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="available">Còn trống</SelectItem>
-                  <SelectItem value="occupied">Đã thuê</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(val: any) => setValue("status", val)}
+                className="w-full h-10"
+                options={[
+                  { value: "available", label: "Còn trống" },
+                  { value: "occupied", label: "Đã thuê" }
+                ]}
+              />
             </div>
 
             <div>
-              <Label htmlFor="room-city">Thành phố</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Thành phố</label>
               <Input
-                id="room-city"
                 placeholder="Ví dụ: TP.HCM"
                 {...register("city")}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="room-district">Quận / Huyện</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Quận / Huyện</label>
               <Input
-                id="room-district"
                 placeholder="Ví dụ: Quận 10"
                 {...register("district")}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <Label htmlFor="room-address">Địa chỉ chi tiết (Số nhà, Tên đường...)</Label>
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Địa chỉ chi tiết (Số nhà, Tên đường...)</label>
               <Input
-                id="room-address"
                 placeholder="Ví dụ: 12 Lý Thường Kiệt, P.7"
                 {...register("address")}
+                className="rounded-lg h-10"
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <Label htmlFor="room-desc">Mô tả chi tiết</Label>
-              <textarea
-                id="room-desc"
+              <label className="text-sm font-semibold text-slate-600 block mb-1">Mô tả chi tiết</label>
+              <Input.TextArea
                 rows={4}
-                className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Mô tả thông tin chi tiết về phòng trọ, quy định, giờ giấc..."
                 {...register("description")}
+                className="rounded-lg"
               />
             </div>
           </div>
 
-          {/* Amenities Grid */}
+          {/* Amenities selection */}
           <div className="space-y-2">
-            <Label>Tiện ích tích hợp</Label>
+            <label className="text-sm font-semibold text-slate-600 block">Tiện ích tích hợp</label>
             {availableAmenities.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 border border-border p-3 rounded-xl max-h-40 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 border border-slate-100 p-4 rounded-2xl max-h-40 overflow-y-auto bg-slate-50/50">
                 {availableAmenities.map((am) => (
-                  <label key={am.id} className="flex items-center gap-2 text-sm cursor-pointer hover:text-indigo-600 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={watchedAmenities.includes(am.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setValue("amenities", [...watchedAmenities, am.id]);
-                        } else {
-                          setValue("amenities", watchedAmenities.filter((id) => id !== am.id));
-                        }
-                      }}
-                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300"
-                    />
-                    <span>{am.name}</span>
-                  </label>
+                  <Checkbox
+                    key={am.id}
+                    checked={watchedAmenities.includes(am.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setValue("amenities", [...watchedAmenities, am.id]);
+                      } else {
+                        setValue("amenities", watchedAmenities.filter((id) => id !== am.id));
+                      }
+                    }}
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    {am.name}
+                  </Checkbox>
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground">Không tìm thấy tiện ích hệ thống nào. Vui lòng thêm tiện ích trước.</div>
+              <div className="text-sm text-slate-400">Không tìm thấy tiện ích hệ thống nào. Vui lòng thêm tiện ích trước.</div>
             )}
           </div>
 
-          {/* Image Upload Input */}
+          {/* Image URLs input */}
           <div className="space-y-2">
-            <Label>Danh sách liên kết hình ảnh (URLs)</Label>
+            <label className="text-sm font-semibold text-slate-600 block">Danh sách liên kết hình ảnh (URLs)</label>
             <div className="flex gap-2">
               <Input
                 value={newImageUrl}
                 onChange={(e) => setNewImageUrl(e.target.value)}
                 placeholder="Nhập liên kết hình ảnh (Ví dụ: https://images.unsplash.com/...)"
+                className="rounded-lg h-10"
               />
               <Button
-                type="button"
                 onClick={() => {
                   if (newImageUrl.trim()) {
                     setValue("images", [...watchedImages, newImageUrl.trim()]);
                     setNewImageUrl("");
                   }
                 }}
-                variant="outline"
-                className="rounded-lg shrink-0"
+                className="rounded-lg h-10 px-4 shrink-0"
               >
                 Thêm ảnh
               </Button>
             </div>
 
             {watchedImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border border-border p-2 rounded-xl">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 border border-slate-100 p-3 rounded-2xl bg-slate-50/50 mt-2">
                 {watchedImages.map((url, idx) => (
-                  <div key={idx} className="relative group aspect-[4/3] rounded-lg overflow-hidden border border-border">
-                    <img src={url} className="w-full h-full object-cover" />
+                  <div key={idx} className="relative group aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white">
+                    <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setValue("images", watchedImages.filter((_, i) => i !== idx))}
-                      className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all shadow-md"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -453,7 +572,7 @@ export function RoomsManage() {
               </div>
             )}
           </div>
-        </div>
+        </form>
       </Modal>
 
       {/* View Room Modal */}
@@ -462,7 +581,7 @@ export function RoomsManage() {
         open={isViewModalOpen}
         onCancel={() => setIsViewModalOpen(false)}
         footer={[
-          <Button key="close" onClick={() => setIsViewModalOpen(false)} className="rounded-full">
+          <Button key="close" onClick={() => setIsViewModalOpen(false)} className="rounded-full h-10 px-5">
             Đóng
           </Button>
         ]}
@@ -474,54 +593,50 @@ export function RoomsManage() {
             {selectedRoom.images && selectedRoom.images.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {selectedRoom.images.map((img, idx) => (
-                  <div key={idx} className="aspect-[4/3] rounded-xl overflow-hidden border border-border">
-                    <img src={img.url} className="w-full h-full object-cover" />
+                  <div key={idx} className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-100 shadow-sm">
+                    <img src={img.url} alt={`Detail ${idx}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center bg-slate-50 border border-dashed rounded-xl text-muted-foreground text-sm">
+              <div className="p-8 text-center bg-slate-50 border border-dashed rounded-2xl text-slate-400 text-sm">
                 Chưa có hình ảnh nào cho phòng trọ này.
               </div>
             )}
 
-            {/* Room Info */}
+            {/* Room Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
-                <span className="text-xs text-muted-foreground block">Tên phòng</span>
+                <span className="text-xs text-slate-400 block font-medium">Tên phòng</span>
                 <span className="font-semibold text-slate-800 text-lg">{selectedRoom.title}</span>
               </div>
               <div>
-                <span className="text-xs text-muted-foreground block">Trạng thái</span>
-                <Badge className={
-                  selectedRoom.status === "available"
-                    ? "bg-emerald-50 text-emerald-700 border-0"
-                    : "bg-rose-50 text-rose-700 border-0"
-                }>
+                <span className="text-xs text-slate-400 block font-medium mb-1">Trạng thái</span>
+                <Tag color={selectedRoom.status === "available" ? "success" : "error"} className="border-0 rounded-full px-2.5 py-0.5 font-medium">
                   {selectedRoom.status === "available" ? "Còn trống" : "Đã thuê"}
-                </Badge>
+                </Tag>
               </div>
 
               <div>
-                <span className="text-xs text-muted-foreground block">Giá thuê</span>
-                <span className="font-semibold text-indigo-600 text-lg">{formatVND(Number(selectedRoom.price_monthly))}</span>
+                <span className="text-xs text-slate-400 block font-medium">Giá thuê</span>
+                <span className="font-bold text-indigo-600 text-lg">{formatVND(Number(selectedRoom.price_monthly))}</span>
               </div>
               <div>
-                <span className="text-xs text-muted-foreground block">Tiền đặt cọc</span>
-                <span className="font-semibold text-slate-800">{formatVND(Number(selectedRoom.deposit_amount) || 0)}</span>
+                <span className="text-xs text-slate-400 block font-medium">Tiền đặt cọc</span>
+                <span className="font-semibold text-slate-800 text-lg">{formatVND(Number(selectedRoom.deposit_amount) || 0)}</span>
               </div>
 
               <div>
-                <span className="text-xs text-muted-foreground block">Diện tích</span>
-                <span className="font-semibold text-slate-800">{selectedRoom.area_sqm || 0} m²</span>
+                <span className="text-xs text-slate-400 block font-medium">Diện tích</span>
+                <span className="font-semibold text-slate-800 text-lg">{selectedRoom.area_sqm || 0} m²</span>
               </div>
               <div>
-                <span className="text-xs text-muted-foreground block">Số người tối đa</span>
-                <span className="font-semibold text-slate-800">{selectedRoom.max_occupants || 1} người</span>
+                <span className="text-xs text-slate-400 block font-medium">Số người tối đa</span>
+                <span className="font-semibold text-slate-800 text-lg">{selectedRoom.max_occupants || 1} người</span>
               </div>
 
               <div className="col-span-1 md:col-span-2">
-                <span className="text-xs text-muted-foreground block">Địa chỉ</span>
+                <span className="text-xs text-slate-400 block font-medium">Địa chỉ</span>
                 <span className="font-semibold text-slate-800">
                   {selectedRoom.address ? `${selectedRoom.address}, ` : ""}
                   {selectedRoom.district ? `${selectedRoom.district}, ` : ""}
@@ -531,155 +646,52 @@ export function RoomsManage() {
 
               {selectedRoom.description && (
                 <div className="col-span-1 md:col-span-2">
-                  <span className="text-xs text-muted-foreground block">Mô tả</span>
-                  <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{selectedRoom.description}</p>
+                  <span className="text-xs text-slate-400 block font-medium">Mô tả</span>
+                  <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap leading-relaxed">{selectedRoom.description}</p>
                 </div>
               )}
             </div>
 
-            {/* Amenities */}
+            {/* Amenities Tag List */}
             <div>
-              <span className="text-xs text-muted-foreground block mb-2">Tiện ích tích hợp</span>
+              <span className="text-xs text-slate-400 block font-medium mb-2">Tiện ích tích hợp</span>
               {selectedRoom.amenities && selectedRoom.amenities.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {selectedRoom.amenities.map((am) => (
-                    <Badge key={am.id} variant="outline" className="rounded-full bg-slate-50 text-slate-700 px-3 py-1 font-normal border-slate-200">
+                    <Tag key={am.id} className="rounded-full bg-slate-50 text-slate-600 px-3.5 py-1 font-normal border-slate-200">
                       {am.name}
-                    </Badge>
+                    </Tag>
                   ))}
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground">Không có tiện ích nào.</span>
+                <span className="text-sm text-slate-400">Không có tiện ích nào được gán.</span>
               )}
             </div>
           </div>
         )}
       </Modal>
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-border">
-          <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
-          <p className="text-muted-foreground text-sm mt-3">Đang tải danh sách phòng trọ...</p>
-        </div>
-      ) : isError ? (
-        <div className="p-8 text-center bg-white rounded-2xl border border-border text-rose-600">
-          Có lỗi xảy ra khi tải dữ liệu: {(error as any)?.message || "Lỗi không xác định"}
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-white border border-border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50">
-                <TableHead className="w-16">ID</TableHead>
-                <TableHead className="w-[45%]">Phòng</TableHead>
-                <TableHead>Diện tích</TableHead>
-                <TableHead>Giá thuê</TableHead>
-                <TableHead>Khách tối đa</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rooms.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center p-6 text-muted-foreground">
-                    Chưa có phòng trọ nào được tạo trên hệ thống.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                rooms.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-slate-50/50">
-                    <TableCell className="font-mono">{r.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={r.images && r.images.length > 0 ? r.images[0].url : "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=300&q=80"} 
-                          className="w-14 h-14 rounded-xl object-cover border border-border shrink-0" 
-                        />
-                        <div>
-                          <div className="font-semibold text-slate-800 line-clamp-1">{r.title}</div>
-                          <div className="text-xs text-muted-foreground line-clamp-1">
-                            {r.address ? `${r.address}, ` : ""}
-                            {r.district ? `${r.district}, ` : ""}
-                            {r.city || ""}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{r.area_sqm ? `${Number(r.area_sqm)}m²` : "N/A"}</TableCell>
-                    <TableCell><span className="text-indigo-600 font-semibold">{formatVND(Number(r.price_monthly))}</span></TableCell>
-                    <TableCell>{r.max_occupants ? `${r.max_occupants} người` : "N/A"}</TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          r.status === "available"
-                            ? "bg-emerald-50 text-emerald-700 border-0"
-                            : "bg-rose-50 text-rose-700 border-0"
-                        }
-                      >
-                        {r.status === "available" ? "Còn trống" : "Đã thuê"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button onClick={() => openViewModal(r)} variant="ghost" size="icon" className="rounded-full">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button onClick={() => openEditModal(r)} variant="ghost" size="icon" className="rounded-full">
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-                        <Popconfirm
-                          title="Xóa phòng trọ"
-                          description="Bạn có chắc chắn muốn xóa phòng trọ này?"
-                          onConfirm={() => handleDeleteRoom(r.id)}
-                          okText="Có"
-                          cancelText="Không"
-                          okButtonProps={{ danger: true }}
-                        >
-                          <span className="inline-block">
-                            <Button variant="ghost" size="icon" className="rounded-full text-rose-600">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </span>
-                        </Popconfirm>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          {/* Pagination UI */}
-          {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-border bg-slate-50">
-              <div className="text-sm text-muted-foreground">
-                Hiển thị {meta.from || 0} - {meta.to || 0} trong tổng số {meta.total} phòng
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="rounded-full"
-                >
-                  Trước
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-                  disabled={page === meta.last_page}
-                  className="rounded-full"
-                >
-                  Sau
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Main Table representation */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <Table
+          columns={columns}
+          dataSource={rooms}
+          rowKey="id"
+          loading={isLoading}
+          pagination={
+            meta && meta.last_page > 1
+              ? {
+                  current: page,
+                  total: meta.total,
+                  pageSize: meta.per_page,
+                  onChange: (p) => setPage(p),
+                  showTotal: (total) => `Hiển thị từ ${meta.from || 0} - ${meta.to || 0} trong tổng số ${total} phòng`,
+                }
+              : false
+          }
+          className="custom-table"
+        />
+      </div>
     </div>
   );
 }

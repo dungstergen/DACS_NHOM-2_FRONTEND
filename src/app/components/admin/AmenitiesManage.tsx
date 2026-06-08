@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Plus, Trash2, Edit3, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit3 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Button, Input, Table, Modal, Popconfirm, Space } from "antd";
+import type { TableColumnsType } from "antd";
 import { toast } from "sonner";
-import { Modal, Popconfirm } from "antd";
 import { 
   useAmenities, 
   useCreateAmenity, 
@@ -40,7 +37,7 @@ export function AmenitiesManage() {
   });
 
   // React Query Hooks
-  const { data, isLoading, isError, error } = useAmenities(page);
+  const { data, isLoading } = useAmenities(page);
   const { mutate: createAmenity, isPending: isCreating } = useCreateAmenity();
   const { mutate: updateAmenity, isPending: isUpdating } = useUpdateAmenity();
   const { mutate: deleteAmenity } = useDeleteAmenity();
@@ -108,15 +105,67 @@ export function AmenitiesManage() {
     });
   };
 
+  // Antd Table columns
+  const columns: TableColumnsType<Amenity> = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 100,
+      render: (id) => <span className="font-mono font-medium text-slate-500">#{id}</span>,
+    },
+    {
+      title: "Tên tiện ích",
+      dataIndex: "name",
+      key: "name",
+      render: (name) => <span className="font-semibold text-slate-700">{name}</span>,
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 150,
+      align: "right",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="text"
+            icon={<Edit3 className="w-4 h-4 text-indigo-600" />}
+            onClick={() => handleStartEdit(record)}
+            className="hover:bg-indigo-50 rounded-full flex items-center justify-center p-0 w-8 h-8"
+          />
+          <Popconfirm
+            title="Xóa tiện ích"
+            description="Bạn có chắc chắn muốn xóa tiện ích này?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Có"
+            cancelText="Không"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              type="text"
+              danger
+              icon={<Trash2 className="w-4 h-4" />}
+              className="hover:bg-rose-50 rounded-full flex items-center justify-center p-0 w-8 h-8"
+            />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl tracking-tight">1. Quản lý tiện ích</h1>
-          <p className="text-muted-foreground mt-1">Cấu hình danh sách tiện ích của phòng trọ trên hệ thống</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-800">Quản lý tiện ích</h1>
+          <p className="text-slate-500 mt-1">Cấu hình danh sách tiện ích của phòng trọ trên hệ thống</p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600">
-          <Plus className="w-4 h-4 mr-1" /> Thêm tiện ích mới
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          type="primary"
+          className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-10 border-0 flex items-center gap-1.5 shadow-md font-medium"
+        >
+          <Plus className="w-4 h-4" /> Thêm tiện ích mới
         </Button>
       </div>
 
@@ -132,14 +181,16 @@ export function AmenitiesManage() {
         confirmLoading={isCreating}
         okText="Thêm mới"
         cancelText="Hủy"
+        okButtonProps={{ className: "rounded-full" }}
+        cancelButtonProps={{ className: "rounded-full" }}
       >
         <div className="py-4 space-y-2">
-          <Label htmlFor="new-amenity-name">Tên tiện ích</Label>
+          <label className="text-sm font-semibold text-slate-600">Tên tiện ích</label>
           <Input
-            id="new-amenity-name"
             placeholder="Ví dụ: Thang máy, Máy sấy tóc..."
             disabled={isCreating}
             {...registerAdd("newName")}
+            className="rounded-lg h-10"
           />
         </div>
       </Modal>
@@ -157,108 +208,41 @@ export function AmenitiesManage() {
         confirmLoading={isUpdating}
         okText="Cập nhật"
         cancelText="Hủy"
+        okButtonProps={{ className: "rounded-full" }}
+        cancelButtonProps={{ className: "rounded-full" }}
       >
         <div className="py-4 space-y-2">
-          <Label htmlFor="edit-amenity-name">Tên tiện ích</Label>
+          <label className="text-sm font-semibold text-slate-600">Tên tiện ích</label>
           <Input
-            id="edit-amenity-name"
             placeholder="Tên tiện ích..."
             disabled={isUpdating}
             {...registerEdit("editingName")}
+            className="rounded-lg h-10"
           />
         </div>
       </Modal>
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-border">
-          <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
-          <p className="text-muted-foreground text-sm mt-3">Đang tải danh sách tiện ích...</p>
-        </div>
-      ) : isError ? (
-        <div className="p-8 text-center bg-white rounded-2xl border border-border text-rose-600">
-          Có lỗi xảy ra khi tải dữ liệu: {(error as any)?.message || "Lỗi không xác định"}
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-white border border-border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50">
-                <TableHead className="w-20">ID</TableHead>
-                <TableHead>Tên tiện ích</TableHead>
-                <TableHead className="text-right w-40">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {amenities.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center p-6 text-muted-foreground">
-                    Chưa có tiện ích nào được tạo.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                amenities.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="font-mono">{a.id}</TableCell>
-                    <TableCell>
-                      <span>{a.name}</span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button onClick={() => handleStartEdit(a)} size="icon" variant="ghost" className="rounded-full">
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-                        <Popconfirm
-                          title="Xóa tiện ích"
-                          description="Bạn có chắc chắn muốn xóa tiện ích này?"
-                          onConfirm={() => handleDelete(a.id)}
-                          okText="Có"
-                          cancelText="Không"
-                          okButtonProps={{ danger: true }}
-                        >
-                          <span className="inline-block">
-                            <Button size="icon" variant="ghost" className="rounded-full text-rose-600">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </span>
-                        </Popconfirm>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          {/* Pagination UI */}
-          {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-border bg-slate-50">
-              <div className="text-sm text-muted-foreground">
-                Hiển thị {meta.from || 0} - {meta.to || 0} trong tổng số {meta.total} tiện ích
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="rounded-full"
-                >
-                  Trước
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-                  disabled={page === meta.last_page}
-                  className="rounded-full"
-                >
-                  Sau
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Table Section */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <Table
+          columns={columns}
+          dataSource={amenities}
+          rowKey="id"
+          loading={isLoading}
+          pagination={
+            meta && meta.last_page > 1
+              ? {
+                  current: page,
+                  total: meta.total,
+                  pageSize: meta.per_page,
+                  onChange: (p) => setPage(p),
+                  showTotal: (total) => `Hiển thị từ ${meta.from || 0} - ${meta.to || 0} trong tổng số ${total} tiện ích`,
+                }
+              : false
+          }
+          className="custom-table"
+        />
+      </div>
     </div>
   );
 }
