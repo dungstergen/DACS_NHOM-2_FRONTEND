@@ -1,10 +1,17 @@
 import { post, get } from "../app/config/axios-configs";
-import type { LoginCredentials, UserResponse } from "../interface/auth.interface";
+import type { LoginCredentials, RegisterCredentials, UserResponse } from "../interface/auth.interface";
 
 export const AuthService = {
   login: async (credentials: LoginCredentials): Promise<UserResponse> => {
     return post<UserResponse>({
       url: "/api/auth/login",
+      data: credentials,
+    });
+  },
+
+  register: async (credentials: RegisterCredentials): Promise<UserResponse> => {
+    return post<UserResponse>({
+      url: "/api/auth/register",
       data: credentials,
     });
   },

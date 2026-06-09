@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AuthService } from "../services/auth.service";
-import type { LoginCredentials, UserResponse } from "../interface/auth.interface";
+import type { LoginCredentials, RegisterCredentials, UserResponse } from "../interface/auth.interface";
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
@@ -13,6 +13,19 @@ export const useLogin = () => {
       localStorage.setItem("access_token", "session_active"); // indicator for stateful session
 
       // Invalidate current user query
+      queryClient.setQueryData(["currentUser"], response.data);
+    },
+  });
+};
+
+export const useRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (credentials: RegisterCredentials) => AuthService.register(credentials),
+    onSuccess: (response: UserResponse) => {
+      localStorage.setItem("user", JSON.stringify(response.data));
+      localStorage.setItem("access_token", "session_active");
       queryClient.setQueryData(["currentUser"], response.data);
     },
   });

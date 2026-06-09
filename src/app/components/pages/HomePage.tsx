@@ -33,49 +33,58 @@ export function HomePage() {
 
           {/* SEARCH BAR */}
           <div className="max-w-4xl mx-auto mt-10">
-            <div className="bg-white rounded-2xl shadow-2xl shadow-indigo-500/10 border border-border p-2 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_auto] gap-2">
-              <div className="flex items-center gap-3 px-4 py-3">
+            <div className="bg-white rounded-[2rem] shadow-2xl shadow-indigo-500/10 border border-slate-100 p-2 flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+              <div className="flex items-center gap-3 px-6 py-2 w-full md:w-auto md:flex-[1.2] hover:bg-slate-50/80 transition-colors md:rounded-l-full cursor-text">
                 <MapPin className="w-5 h-5 text-indigo-600" />
                 <div className="flex-1">
-                  <div className="text-xs text-muted-foreground">Khu vực</div>
-                  <Input className="border-0 p-0 h-auto shadow-none focus-visible:ring-0" placeholder="Quận, đường..." />
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-0.5">Khu vực</div>
+                  <Input className="border-0 p-0 h-auto shadow-none focus-visible:ring-0 bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 placeholder:font-normal w-full" placeholder="Quận, đường..." />
                 </div>
               </div>
-              <Select>
-                <SelectTrigger className="border-0 shadow-none h-full px-4">
-                  <div className="text-left">
-                    <div className="text-xs text-muted-foreground">Giá thuê</div>
-                    <SelectValue placeholder="Mọi mức giá" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Dưới 3 triệu</SelectItem>
-                  <SelectItem value="2">3 - 5 triệu</SelectItem>
-                  <SelectItem value="3">5 - 8 triệu</SelectItem>
-                  <SelectItem value="4">Trên 8 triệu</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select>
-                <SelectTrigger className="border-0 shadow-none h-full px-4">
-                  <div className="text-left">
-                    <div className="text-xs text-muted-foreground">Diện tích</div>
-                    <SelectValue placeholder="Mọi diện tích" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Dưới 20m²</SelectItem>
-                  <SelectItem value="2">20 - 30m²</SelectItem>
-                  <SelectItem value="3">Trên 30m²</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={() => navigate("/rooms")}
-                size="lg"
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 px-6 h-full"
-              >
-                <Search className="w-5 h-5 mr-2" />
-                Tìm kiếm
-              </Button>
+
+              <div className="w-full md:w-auto md:flex-1 px-6 py-2 hover:bg-slate-50/80 transition-colors cursor-pointer group">
+                <Select>
+                  <SelectTrigger className="border-0 shadow-none h-auto p-0 focus:ring-0 bg-transparent hover:bg-transparent data-[state=open]:bg-transparent [&>span]:text-sm [&>span]:font-medium [&>span]:text-slate-900">
+                    <div className="text-left w-full">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-0.5">Giá thuê</div>
+                      <SelectValue placeholder="Mọi mức giá" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+                    <SelectItem value="1" className="rounded-xl cursor-pointer">Dưới 3 triệu</SelectItem>
+                    <SelectItem value="2" className="rounded-xl cursor-pointer">3 - 5 triệu</SelectItem>
+                    <SelectItem value="3" className="rounded-xl cursor-pointer">5 - 8 triệu</SelectItem>
+                    <SelectItem value="4" className="rounded-xl cursor-pointer">Trên 8 triệu</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-full md:w-auto md:flex-1 px-6 py-2 hover:bg-slate-50/80 transition-colors cursor-pointer group">
+                <Select>
+                  <SelectTrigger className="border-0 shadow-none h-auto p-0 focus:ring-0 bg-transparent hover:bg-transparent data-[state=open]:bg-transparent [&>span]:text-sm [&>span]:font-medium [&>span]:text-slate-900">
+                    <div className="text-left w-full">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-0.5">Diện tích</div>
+                      <SelectValue placeholder="Mọi diện tích" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+                    <SelectItem value="1" className="rounded-xl cursor-pointer">Dưới 20m²</SelectItem>
+                    <SelectItem value="2" className="rounded-xl cursor-pointer">20 - 30m²</SelectItem>
+                    <SelectItem value="3" className="rounded-xl cursor-pointer">Trên 30m²</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-full md:w-auto p-1 pl-2">
+                <Button
+                  onClick={() => navigate("/rooms")}
+                  size="lg"
+                  className="w-full md:w-auto rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 px-8 h-12 shadow-lg shadow-indigo-500/30 text-white font-medium"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Tìm kiếm
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
               <span>Phổ biến:</span>
@@ -187,7 +196,7 @@ export function HomePage() {
           <div className="relative max-w-2xl">
             <h2 className="text-3xl md:text-4xl tracking-tight">Bạn là chủ phòng trọ?</h2>
             <p className="mt-4 text-white/80">
-              Đăng tin miễn phí, tiếp cận hàng nghìn người thuê tiềm năng và quản lý phòng dễ dàng với TroHub.
+              Đăng tin miễn phí, tiếp cận hàng nghìn người thuê tiềm năng và quản lý phòng dễ dàng với Rental.
             </p>
             <Button size="lg" className="mt-8 bg-white text-indigo-700 hover:bg-white/90 rounded-full">
               Đăng tin ngay <ArrowRight className="w-4 h-4 ml-2" />

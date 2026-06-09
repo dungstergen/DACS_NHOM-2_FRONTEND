@@ -663,7 +663,7 @@ export function Contracts() {
 
             <Descriptions bordered column={1} size="small" className="rounded-xl overflow-hidden">
               <Descriptions.Item label="Bên cho thuê">
-                <strong>Hệ thống quản lý TroHub</strong>
+                <strong>Hệ thống quản lý Rental</strong>
               </Descriptions.Item>
               <Descriptions.Item label="Bên thuê (Khách hàng)">
                 <div>

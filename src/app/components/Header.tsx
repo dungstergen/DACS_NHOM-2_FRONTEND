@@ -35,7 +35,7 @@ export function Header() {
               <Home className="w-5 h-5" />
             </div>
             <span className="text-lg tracking-tight">
-              Tro<span className="text-indigo-600">Hub</span>
+              Rental
             </span>
           </Link>
 

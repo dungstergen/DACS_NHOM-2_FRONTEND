@@ -81,7 +81,7 @@ export function AdminLayout() {
                 <Home className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-sm tracking-tight">TroHub</div>
+                <div className="text-sm tracking-tight">Rental</div>
                 <div className="text-xs text-muted-foreground">Admin Console</div>
               </div>
             </div>
